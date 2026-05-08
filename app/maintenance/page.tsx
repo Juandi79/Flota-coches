@@ -1,0 +1,141 @@
+'use client'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase'
+
+type Maintenance = {
+  id: string
+  vehicle_id: string
+  type: string
+  date: string
+  next_date: string
+  cost: number
+  notes: string
+  vehicles?: { brand: string; model: string; plate: string }
+}
+
+export default function MaintenancePage() {
+  const supabase = createClient()
+  const [records, setRecords] = useState<Maintenance[]>([])
+  const [vehicles, setVehicles] = useState<any[]>([])
+  const [showForm, setShowForm] = useState(false)
+  const [form, setForm] = useState({ vehicle_id: '', type: '', date: '', next_date: '', cost: '', notes: '' })
+
+  async function load() {
+    const { data } = await supabase
+      .from('maintenance')
+      .select('*, vehicles(brand, model, plate)')
+      .order('date', { ascending: false })
+    if (data) setRecords(data)
+
+    const { data: v } = await supabase.from('vehicles').select('id, brand, model, plate')
+    if (v) setVehicles(v)
+  }
+
+  useEffect(() => { load() }, [])
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    await supabase.from('maintenance').insert({ ...form, cost: Number(form.cost) })
+    setShowForm(false)
+    load()
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('¿Eliminar este registro?')) return
+    await supabase.from('maintenance').delete().eq('id', id)
+    load()
+  }
+
+  const isUrgent = (date: string) => {
+    const diff = new Date(date).getTime() - Date.now()
+    return diff < 7 * 24 * 60 * 60 * 1000
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-3xl font-bold text-white">Mantenimiento</h1>
+          <p className="text-slate-500 mt-1">{records.length} registro{records.length !== 1 ? 's' : ''}</p>
+        </div>
+        <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+          Registrar
+        </button>
+      </div>
+
+      <div className="grid gap-4">
+        {records.map(m => (
+          <div key={m.id} className={`card flex items-center justify-between gap-4 ${m.next_date && isUrgent(m.next_date) ? 'border-amber-500/30' : ''}`}>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center border border-red-500/20 shrink-0">
+                <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" /></svg>
+              </div>
+              <div>
+                <p className="font-medium text-white">{m.vehicles?.brand} {m.vehicles?.model} <span className="text-slate-500 text-sm">· {m.vehicles?.plate}</span></p>
+                <p className="text-slate-400 text-sm mt-0.5">
+                  {m.type} · Realizado: {new Date(m.date).toLocaleDateString('es-ES')}
+                  {m.next_date && <> · Próximo: <span className={isUrgent(m.next_date) ? 'text-amber-400' : ''}>{new Date(m.next_date).toLocaleDateString('es-ES')}</span></>}
+                </p>
+                {m.cost > 0 && <p className="text-slate-500 text-xs mt-1">{m.cost.toLocaleString()}€</p>}
+                {m.notes && <p className="text-slate-500 text-xs mt-0.5">{m.notes}</p>}
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              {m.next_date && isUrgent(m.next_date) && (
+                <span className="badge-maintenance">Urgente</span>
+              )}
+              <button onClick={() => handleDelete(m.id)} className="text-slate-400 hover:text-red-400 transition-colors p-2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+              </button>
+            </div>
+          </div>
+        ))}
+        {records.length === 0 && (
+          <div className="card text-center py-12">
+            <p className="text-slate-500">No hay registros de mantenimiento.</p>
+          </div>
+        )}
+      </div>
+
+      {showForm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-surface-900 border border-surface-800 rounded-2xl p-6 w-full max-w-md">
+            <h2 className="font-display text-xl font-semibold text-white mb-6">Registrar mantenimiento</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="label">Vehículo</label>
+                <select className="input" value={form.vehicle_id} onChange={e => setForm({...form, vehicle_id: e.target.value})} required>
+                  <option value="">Seleccionar vehículo</option>
+                  {vehicles.map(v => (
+                    <option key={v.id} value={v.id}>{v.brand} {v.model} · {v.plate}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="label">Tipo de mantenimiento</label>
+                <input className="input" placeholder="Ej: Cambio de aceite, ITV, Revisión..." value={form.type} onChange={e => setForm({...form, type: e.target.value})} required />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="label">Fecha realizado</label><input className="input" type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})} required /></div>
+                <div><label className="label">Próximo (opcional)</label><input className="input" type="date" value={form.next_date} onChange={e => setForm({...form, next_date: e.target.value})} /></div>
+              </div>
+              <div>
+                <label className="label">Coste (€)</label>
+                <input className="input" type="number" placeholder="0" value={form.cost} onChange={e => setForm({...form, cost: e.target.value})} />
+              </div>
+              <div>
+                <label className="label">Notas (opcional)</label>
+                <textarea className="input resize-none" rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1">Cancelar</button>
+                <button type="submit" className="btn-primary flex-1">Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
