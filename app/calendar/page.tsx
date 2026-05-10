@@ -139,6 +139,7 @@ export default function CalendarPage() {
               <div>
                 <p className="text-white text-sm font-medium">{r.vehicles?.brand} {r.vehicles?.model} · {r.vehicles?.plate}</p>
                 <p className="text-slate-400 text-xs mt-0.5">{r.driver_name} · {new Date(r.start_date).toLocaleDateString('es-ES')} → {new Date(r.end_date).toLocaleDateString('es-ES')}</p>
+{r.notes && <p className="text-slate-500 text-xs mt-0.5">📍 {r.notes}</p>}
               </div>
             </div>
           ))}
