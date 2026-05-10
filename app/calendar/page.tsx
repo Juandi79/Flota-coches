@@ -8,6 +8,7 @@ type Reservation = {
   driver_name: string
   start_date: string
   end_date: string
+  notes: string
   vehicles?: { brand: string; model: string; plate: string }
 }
 
