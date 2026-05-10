@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase'
 
 type Reservation = {
   id: string
+  vehicle_id: string
   driver_name: string
   start_date: string
   end_date: string
