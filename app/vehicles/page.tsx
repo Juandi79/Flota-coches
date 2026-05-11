@@ -73,7 +73,7 @@ export default function VehiclesPage() {
 
   function openNew() {
     setEditing(null)
-    setForm({ brand: '', model: '', plate: '', year: '', status: 'available', chassis_number: '', insurance_company: '', insurance_policy: '', itv_date: '', photo_url: '' })
+    setForm({ brand: '', model: '', plate: '', year: '', status: 'available', chassis_number: '', insurance_company: '', insurance_policy: '', itv_date: '', photo_url: '', ownership: 'propio'})
     setShowForm(true)
   }
 
