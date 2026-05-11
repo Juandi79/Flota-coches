@@ -33,10 +33,10 @@ export default function LoginPage() {
     setSuccess('')
     const { error } = await supabase.auth.signUp({ email, password })
     if (error) {
-      setError(error.message)
+      setError('Solo puedes registrarte con una cuenta @nunsys.com')
       setLoading(false)
     } else {
-      setSuccess('Cuenta creada. Revisa tu email para confirmarla o inicia sesión directamente.')
+      setSuccess('Cuenta creada. Inicia sesión directamente.')
       setLoading(false)
     }
   }
