@@ -14,6 +14,7 @@ type Vehicle = {
   insurance_policy: string
   itv_date: string
   photo_url: string
+  ownership: string
 }
 
 type Maintenance = {
@@ -38,7 +39,7 @@ export default function VehiclesPage() {
   const [uploading, setUploading] = useState(false)
   const [form, setForm] = useState({
     brand: '', model: '', plate: '', year: '', status: 'available',
-    chassis_number: '', insurance_company: '', insurance_policy: '', itv_date: '', photo_url: ''
+    chassis_number: '', insurance_company: '', insurance_policy: '', itv_date: '', photo_url: '', ownership: 'propio'
   })
 
   async function loadVehicles() {
@@ -81,7 +82,7 @@ export default function VehiclesPage() {
     setForm({
       brand: v.brand, model: v.model, plate: v.plate, year: String(v.year), status: v.status,
       chassis_number: v.chassis_number || '', insurance_company: v.insurance_company || '',
-      insurance_policy: v.insurance_policy || '', itv_date: v.itv_date || '', photo_url: v.photo_url || ''
+      insurance_policy: v.insurance_policy || '', itv_date: v.itv_date || '', photo_url: v.photo_url || '', ownership: v.ownership || 'propio'
     })
     setShowForm(true)
   }
@@ -193,6 +194,12 @@ export default function VehiclesPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
+                {selected.ownership && (
+                  <div style={{backgroundColor: '#1e293b', borderRadius: '0.75rem', padding: '1rem'}}>
+                    <p className="text-slate-500 text-xs mb-1">Propiedad</p>
+                    <p className="text-white text-sm font-medium capitalize">{selected.ownership}</p>
+                  </div>
+                )}
                 {selected.chassis_number && (
                   <div style={{backgroundColor: '#1e293b', borderRadius: '0.75rem', padding: '1rem'}}>
                     <p className="text-slate-500 text-xs mb-1">Nº Bastidor</p>
@@ -271,6 +278,10 @@ export default function VehiclesPage() {
                 <div><label className="label">Nº Póliza</label><input className="input" value={form.insurance_policy} onChange={e => setForm({...form, insurance_policy: e.target.value})} /></div>
               </div>
               <div><label className="label">Fecha ITV</label><input className="input" type="date" value={form.itv_date} onChange={e => setForm({...form, itv_date: e.target.value})} /></div>
+              <div>
+                <label className="label">Propiedad</label>
+                <input className="input" placeholder="Ej: Propio, Renting (Alphabet)..." value={form.ownership} onChange={e => setForm({...form, ownership: e.target.value})} />
+              </div>
               <div>
                 <label className="label">Estado</label>
                 <select className="input" value={form.status} onChange={e => setForm({...form, status: e.target.value})}>
