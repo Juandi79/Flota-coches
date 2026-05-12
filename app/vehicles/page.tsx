@@ -135,8 +135,9 @@ export default function VehiclesPage() {
 
       <div className="grid gap-4">
         {vehicles.map(v => (
-          <div key={v.id} className="card flex items-center justify-between gap-4 overflow-hidden cursor-pointer hover:border-slate-600 transition-all" onClick={() => openDetail(v)}>
-            <div className="flex items-center gap-4">
+          <div key={v.id} className="card cursor-pointer hover:border-slate-600 transition-all overflow-hidden" onClick={() => openDetail(v)}>
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center gap-3 min-w-0">
               <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0" style={{border: '1px solid #1e293b'}}>
                 {v.photo_url ? (
                   <img src={v.photo_url} alt={v.model} className="w-full h-full object-cover" />
@@ -151,7 +152,8 @@ export default function VehiclesPage() {
                 <p className="text-slate-400 text-sm mt-0.5">{v.plate}{v.itv_date && <> · ITV: <span style={itvUrgent(v.itv_date) ? {color: '#f59e0b'} : {}}>{new Date(v.itv_date).toLocaleDateString('es-ES')}</span></>}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3" onClick={e => e.stopPropagation()}>
+            </div>
+            <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
               <span className={v.status === 'available' ? 'badge-available' : v.status === 'reserved' ? 'badge-reserved' : 'badge-maintenance'}>
                 {statusLabel[v.status]}
               </span>
