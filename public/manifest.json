@@ -1,7 +1,7 @@
 {
-  "name": "FleetManager Pro",
-  "short_name": "FleetPro",
-  "description": "Gestión de flota de vehículos",
+  "name": "Nunsys Flota",
+  "short_name": "Nunsys Flota",
+  "description": "Gestión de flota de vehículos Nunsys",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#090f1a",
