@@ -135,7 +135,7 @@ export default function VehiclesPage() {
 
       <div className="grid gap-4">
         {vehicles.map(v => (
-          <div key={v.id} className="card flex items-center justify-between gap-4 cursor-pointer hover:border-slate-600 transition-all" onClick={() => openDetail(v)}>
+          <div key={v.id} className="card flex items-center justify-between gap-4 overflow-hidden cursor-pointer hover:border-slate-600 transition-all" onClick={() => openDetail(v)}>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0" style={{border: '1px solid #1e293b'}}>
                 {v.photo_url ? (
