@@ -152,7 +152,6 @@ export default function VehiclesPage() {
                 <p className="text-slate-400 text-sm mt-0.5">{v.plate}{v.itv_date && <> · ITV: <span style={itvUrgent(v.itv_date) ? {color: '#f59e0b'} : {}}>{new Date(v.itv_date).toLocaleDateString('es-ES')}</span></>}</p>
               </div>
             </div>
-            </div>
             <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
               <span className={v.status === 'available' ? 'badge-available' : v.status === 'reserved' ? 'badge-reserved' : 'badge-maintenance'}>
                 {statusLabel[v.status]}
