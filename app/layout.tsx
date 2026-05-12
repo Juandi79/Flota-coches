@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'FleetManager Pro',
-  description: 'Gestión de flota de vehículos',
+  title: 'Nunsys Flota',
+  description: 'Gestión de flota de vehículos Nunsys Sevilla',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
