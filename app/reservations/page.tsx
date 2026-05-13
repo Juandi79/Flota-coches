@@ -127,7 +127,8 @@ export default function ReservationsPage() {
               )}
             </div>
           </div>
-        ))}
+        </div>
+       ))}
         {reservations.length === 0 && (
           <div className="card text-center py-12">
             <p className="text-slate-500">No hay reservas aún.</p>
