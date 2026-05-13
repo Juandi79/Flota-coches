@@ -39,7 +39,7 @@ export default function VehiclesPage() {
   const [uploading, setUploading] = useState(false)
   const [form, setForm] = useState({
     brand: '', model: '', plate: '', year: '', status: 'available',
-    chassis_number: '', insurance_company: '', insurance_policy: '', itv_date: '', photo_url: '', ownership: 'propio'
+    chassis_number: '', insurance_company: '', insurance_policy: '', itv_date: '', photo_url: '', ownership: ''
   })
 
   async function loadVehicles() {
@@ -73,7 +73,7 @@ export default function VehiclesPage() {
 
   function openNew() {
     setEditing(null)
-    setForm({ brand: '', model: '', plate: '', year: '', status: 'available', chassis_number: '', insurance_company: '', insurance_policy: '', itv_date: '', photo_url: '', ownership: 'propio'})
+    setForm({ brand: '', model: '', plate: '', year: '', status: 'available', chassis_number: '', insurance_company: '', insurance_policy: '', itv_date: '', photo_url: '', ownership: '' })
     setShowForm(true)
   }
 
@@ -82,7 +82,7 @@ export default function VehiclesPage() {
     setForm({
       brand: v.brand, model: v.model, plate: v.plate, year: String(v.year), status: v.status,
       chassis_number: v.chassis_number || '', insurance_company: v.insurance_company || '',
-      insurance_policy: v.insurance_policy || '', itv_date: v.itv_date || '', photo_url: v.photo_url || '', ownership: v.ownership || 'propio'
+      insurance_policy: v.insurance_policy || '', itv_date: v.itv_date || '', photo_url: v.photo_url || '', ownership: v.ownership || ''
     })
     setShowForm(true)
   }
@@ -136,36 +136,37 @@ export default function VehiclesPage() {
       <div className="grid gap-4">
         {vehicles.map(v => (
           <div key={v.id} className="card cursor-pointer hover:border-slate-600 transition-all overflow-hidden" onClick={() => openDetail(v)}>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-3 min-w-0">
-              <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0" style={{border: '1px solid #1e293b'}}>
-                {v.photo_url ? (
-                  <img src={v.photo_url} alt={v.model} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center" style={{backgroundColor: 'rgba(59,91,219,0.1)'}}>
-                    <svg className="w-6 h-6" style={{color: '#3b5bdb'}} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>
-                  </div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0" style={{border: '1px solid #1e293b'}}>
+                  {v.photo_url ? (
+                    <img src={v.photo_url} alt={v.model} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center" style={{backgroundColor: 'rgba(59,91,219,0.1)'}}>
+                      <svg className="w-6 h-6" style={{color: '#3b5bdb'}} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-medium text-white truncate">{v.brand} {v.model} <span className="text-slate-500 font-normal">({v.year})</span></p>
+                  <p className="text-slate-400 text-sm mt-0.5 truncate">{v.plate}{v.itv_date && <> · ITV: <span style={itvUrgent(v.itv_date) ? {color: '#f59e0b'} : {}}>{new Date(v.itv_date).toLocaleDateString('es-ES')}</span></>}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                <span className={v.status === 'available' ? 'badge-available' : v.status === 'reserved' ? 'badge-reserved' : 'badge-maintenance'}>
+                  {statusLabel[v.status]}
+                </span>
+                {isAdmin && (
+                  <>
+                    <button onClick={() => openEdit(v)} className="text-slate-400 hover:text-white transition-colors p-2">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                    </button>
+                    <button onClick={() => handleDelete(v.id)} className="text-slate-400 hover:text-red-400 transition-colors p-2">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  </>
                 )}
               </div>
-              <div>
-                <p className="font-medium text-white">{v.brand} {v.model} <span className="text-slate-500 font-normal">({v.year})</span></p>
-                <p className="text-slate-400 text-sm mt-0.5">{v.plate}{v.itv_date && <> · ITV: <span style={itvUrgent(v.itv_date) ? {color: '#f59e0b'} : {}}>{new Date(v.itv_date).toLocaleDateString('es-ES')}</span></>}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
-              <span className={v.status === 'available' ? 'badge-available' : v.status === 'reserved' ? 'badge-reserved' : 'badge-maintenance'}>
-                {statusLabel[v.status]}
-              </span>
-              {isAdmin && (
-                <>
-                  <button onClick={() => openEdit(v)} className="text-slate-400 hover:text-white transition-colors p-2">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                  </button>
-                  <button onClick={() => handleDelete(v.id)} className="text-slate-400 hover:text-red-400 transition-colors p-2">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                  </button>
-                </>
-              )}
             </div>
           </div>
         ))}
@@ -176,7 +177,6 @@ export default function VehiclesPage() {
         )}
       </div>
 
-      {/* Detail modal */}
       {selected && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div style={{backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '1rem'}} className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
@@ -193,12 +193,11 @@ export default function VehiclesPage() {
                   {statusLabel[selected.status]}
                 </span>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 {selected.ownership && (
                   <div style={{backgroundColor: '#1e293b', borderRadius: '0.75rem', padding: '1rem'}}>
                     <p className="text-slate-500 text-xs mb-1">Propiedad</p>
-                    <p className="text-white text-sm font-medium capitalize">{selected.ownership}</p>
+                    <p className="text-white text-sm font-medium">{selected.ownership}</p>
                   </div>
                 )}
                 {selected.chassis_number && (
@@ -224,8 +223,6 @@ export default function VehiclesPage() {
                   </div>
                 )}
               </div>
-
-              {/* Repairs */}
               <div>
                 <h3 className="font-display font-semibold text-white mb-3">Reparaciones</h3>
                 {repairs.length === 0 ? (
@@ -245,20 +242,17 @@ export default function VehiclesPage() {
                   </div>
                 )}
               </div>
-
               <button onClick={() => setSelected(null)} className="btn-secondary w-full">Cerrar</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Form modal */}
       {showForm && isAdmin && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div style={{backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '1rem', padding: '1.5rem'}} className="w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="font-display text-xl font-semibold text-white mb-6">{editing ? 'Editar vehículo' : 'Nuevo vehículo'}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Foto */}
               <div>
                 <label className="label">Foto del vehículo</label>
                 {form.photo_url && <img src={form.photo_url} className="w-full h-32 object-cover rounded-xl mb-2" />}
