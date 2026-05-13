@@ -5,10 +5,14 @@ export const metadata: Metadata = {
   title: 'Nunsys Flota',
   description: 'Gestión de flota de vehículos Nunsys Sevilla',
   manifest: '/manifest.json',
-  appleWebApp: {
+    appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'FleetPro',
+    title: 'Nunsys Flota',
+  },
+  icons: {
+    icon: '/icon-512.png',
+    apple: '/icon-512.png',
   },
 }
 
