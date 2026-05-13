@@ -96,9 +96,11 @@ export default function VehiclesPage() {
     e.preventDefault()
     const payload = { ...form, year: Number(form.year) }
     if (editing) {
-      await supabase.from('vehicles').update(payload).eq('id', editing.id)
+      const { error } = await supabase.from('vehicles').update(payload).eq('id', editing.id)
+      if (error) { alert('Error al guardar: ' + error.message); return }
     } else {
-      await supabase.from('vehicles').insert(payload)
+      const { error } = await supabase.from('vehicles').insert(payload)
+      if (error) { alert('Error al añadir: ' + error.message); return }
     }
     setShowForm(false)
     loadVehicles()
