@@ -41,6 +41,17 @@ export default function LoginPage() {
     }
   }
 
+  async function handleForgotPassword() {
+    if (!email) { setError('Introduce tu email primero'); return }
+    setLoading(true)
+    setError('')
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://nunsysflota.vercel.app/reset-password'
+    })
+    setSuccess('Te hemos enviado un email para restablecer tu contraseña.')
+    setLoading(false)
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{backgroundColor: '#090f1a'}}>
       <div className="w-full max-w-md">
@@ -80,6 +91,13 @@ export default function LoginPage() {
               <input type="password" className="input" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
               {mode === 'register' && <p className="text-xs mt-1" style={{color: '#64748b'}}>Mínimo 6 caracteres</p>}
             </div>
+            {mode === 'login' && (
+              <div className="text-right">
+                <button type="button" onClick={handleForgotPassword} className="text-xs" style={{color: '#3b5bdb'}}>
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
+            )}
             {error && (
               <div style={{backgroundColor: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '0.75rem', padding: '0.75rem'}}>
                 <span style={{color: '#f87171'}} className="text-sm">{error}</span>
