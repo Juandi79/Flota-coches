@@ -15,6 +15,9 @@ type Vehicle = {
   itv_date: string
   photo_url: string
   ownership: string
+  roof_rack_height: string
+  cargo_width: string
+  cargo_length: string
 }
 
 type Maintenance = {
@@ -39,7 +42,9 @@ export default function VehiclesPage() {
   const [uploading, setUploading] = useState(false)
   const [form, setForm] = useState({
     brand: '', model: '', plate: '', year: '', status: 'available',
-    chassis_number: '', insurance_company: '', insurance_policy: '', itv_date: '', photo_url: '', ownership: ''
+    chassis_number: '', insurance_company: '', insurance_policy: '',
+    itv_date: '', photo_url: '', ownership: '',
+    roof_rack_height: '', cargo_width: '', cargo_length: ''
   })
 
   async function loadVehicles() {
@@ -73,7 +78,12 @@ export default function VehiclesPage() {
 
   function openNew() {
     setEditing(null)
-    setForm({ brand: '', model: '', plate: '', year: '', status: 'available', chassis_number: '', insurance_company: '', insurance_policy: '', itv_date: '', photo_url: '', ownership: '' })
+    setForm({
+      brand: '', model: '', plate: '', year: '', status: 'available',
+      chassis_number: '', insurance_company: '', insurance_policy: '',
+      itv_date: '', photo_url: '', ownership: '',
+      roof_rack_height: '', cargo_width: '', cargo_length: ''
+    })
     setShowForm(true)
   }
 
@@ -82,7 +92,9 @@ export default function VehiclesPage() {
     setForm({
       brand: v.brand, model: v.model, plate: v.plate, year: String(v.year), status: v.status,
       chassis_number: v.chassis_number || '', insurance_company: v.insurance_company || '',
-      insurance_policy: v.insurance_policy || '', itv_date: v.itv_date || '', photo_url: v.photo_url || '', ownership: v.ownership || ''
+      insurance_policy: v.insurance_policy || '', itv_date: v.itv_date || '',
+      photo_url: v.photo_url || '', ownership: v.ownership || '',
+      roof_rack_height: v.roof_rack_height || '', cargo_width: v.cargo_width || '', cargo_length: v.cargo_length || ''
     })
     setShowForm(true)
   }
@@ -195,7 +207,8 @@ export default function VehiclesPage() {
                   {statusLabel[selected.status]}
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+
+              <div className="grid grid-cols-2 gap-3">
                 {selected.ownership && (
                   <div style={{backgroundColor: '#1e293b', borderRadius: '0.75rem', padding: '1rem'}}>
                     <p className="text-slate-500 text-xs mb-1">Propiedad</p>
@@ -224,7 +237,21 @@ export default function VehiclesPage() {
                     </p>
                   </div>
                 )}
+                {selected.roof_rack_height && (
+                  <div style={{backgroundColor: '#1e293b', borderRadius: '0.75rem', padding: '1rem'}}>
+                    <p className="text-slate-500 text-xs mb-1">Altura baca</p>
+                    <p className="text-white text-sm font-medium">{selected.roof_rack_height}</p>
+                  </div>
+                )}
+                {(selected.cargo_width || selected.cargo_length) && (
+                  <div style={{backgroundColor: '#1e293b', borderRadius: '0.75rem', padding: '1rem'}}>
+                    <p className="text-slate-500 text-xs mb-1">Dimensiones cajón</p>
+                    {selected.cargo_width && <p className="text-white text-sm font-medium">Ancho: {selected.cargo_width}</p>}
+                    {selected.cargo_length && <p className="text-white text-sm font-medium">Largo: {selected.cargo_length}</p>}
+                  </div>
+                )}
               </div>
+
               <div>
                 <h3 className="font-display font-semibold text-white mb-3">Reparaciones</h3>
                 {repairs.length === 0 ? (
@@ -244,6 +271,7 @@ export default function VehiclesPage() {
                   </div>
                 )}
               </div>
+
               <button onClick={() => setSelected(null)} className="btn-secondary w-full">Cerrar</button>
             </div>
           </div>
@@ -275,10 +303,15 @@ export default function VehiclesPage() {
                 <div><label className="label">Nº Póliza</label><input className="input" value={form.insurance_policy} onChange={e => setForm({...form, insurance_policy: e.target.value})} /></div>
               </div>
               <div><label className="label">Fecha ITV</label><input className="input" type="date" value={form.itv_date} onChange={e => setForm({...form, itv_date: e.target.value})} /></div>
+              <div><label className="label">Propiedad</label><input className="input" placeholder="Ej: Propio, Renting (Alphabet)..." value={form.ownership} onChange={e => setForm({...form, ownership: e.target.value})} /></div>
               <div>
-                <label className="label">Propiedad</label>
-                <input className="input" placeholder="Ej: Propio, Renting (Alphabet)..." value={form.ownership} onChange={e => setForm({...form, ownership: e.target.value})} />
+                <label className="label">Dimensiones cajón</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div><input className="input" placeholder="Ancho (ej: 1.80m)" value={form.cargo_width} onChange={e => setForm({...form, cargo_width: e.target.value})} /></div>
+                  <div><input className="input" placeholder="Largo (ej: 2.50m)" value={form.cargo_length} onChange={e => setForm({...form, cargo_length: e.target.value})} /></div>
+                </div>
               </div>
+              <div><label className="label">Altura baca</label><input className="input" placeholder="Ej: 2.10m" value={form.roof_rack_height} onChange={e => setForm({...form, roof_rack_height: e.target.value})} /></div>
               <div>
                 <label className="label">Estado</label>
                 <select className="input" value={form.status} onChange={e => setForm({...form, status: e.target.value})}>
