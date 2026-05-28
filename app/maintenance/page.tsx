@@ -10,25 +10,34 @@ type Maintenance = {
   next_date: string
   cost: number
   notes: string
-  vehicles?: { brand: string; model: string; plate: string }
+  vehicles?: { brand: string; model: string; plate: string; photo_url: string }
+}
+
+type Vehicle = {
+  id: string
+  brand: string
+  model: string
+  plate: string
+  photo_url: string
 }
 
 export default function MaintenancePage() {
   const supabase = createClient()
   const [records, setRecords] = useState<Maintenance[]>([])
-  const [vehicles, setVehicles] = useState<any[]>([])
+  const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [role, setRole] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null)
   const [form, setForm] = useState({ vehicle_id: '', type: '', date: '', next_date: '', cost: '', notes: '' })
 
   async function load() {
     const { data } = await supabase
       .from('maintenance')
-      .select('*, vehicles(brand, model, plate)')
+      .select('*, vehicles(brand, model, plate, photo_url)')
       .order('date', { ascending: false })
     if (data) setRecords(data)
 
-    const { data: v } = await supabase.from('vehicles').select('id, brand, model, plate')
+    const { data: v } = await supabase.from('vehicles').select('id, brand, model, plate, photo_url')
     if (v) setVehicles(v)
   }
 
@@ -39,8 +48,19 @@ export default function MaintenancePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    await supabase.from('maintenance').insert({ ...form, cost: Number(form.cost) })
+    const payload: any = {
+      vehicle_id: form.vehicle_id,
+      type: form.type,
+      date: form.date,
+      cost: Number(form.cost) || 0,
+      notes: form.notes,
+    }
+    if (form.next_date) payload.next_date = form.next_date
+
+    const { error } = await supabase.from('maintenance').insert(payload)
+    if (error) { alert('Error: ' + error.message); return }
     setShowForm(false)
+    setForm({ vehicle_id: '', type: '', date: '', next_date: '', cost: '', notes: '' })
     load()
   }
 
@@ -56,12 +76,20 @@ export default function MaintenancePage() {
     return diff < 7 * 24 * 60 * 60 * 1000
   }
 
+  const filteredRecords = selectedVehicle
+    ? records.filter(r => r.vehicle_id === selectedVehicle)
+    : records
+
+  const selectedVehicleData = vehicles.find(v => v.id === selectedVehicle)
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-3xl font-bold text-white">Mantenimiento</h1>
-          <p className="text-slate-500 mt-1">{records.length} registro{records.length !== 1 ? 's' : ''}</p>
+          <p className="text-slate-500 mt-1">
+            {selectedVehicle ? `${selectedVehicleData?.brand} ${selectedVehicleData?.model}` : 'Todos los vehículos'}
+          </p>
         </div>
         {isAdmin && (
           <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2">
@@ -71,8 +99,33 @@ export default function MaintenancePage() {
         )}
       </div>
 
+      {/* Filtro por vehículo */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        <button
+          onClick={() => setSelectedVehicle(null)}
+          className="shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all"
+          style={!selectedVehicle ? {backgroundColor: '#3b5bdb', color: 'white'} : {backgroundColor: '#1e293b', color: '#94a3b8'}}
+        >
+          Todos
+        </button>
+        {vehicles.map(v => (
+          <button
+            key={v.id}
+            onClick={() => setSelectedVehicle(v.id)}
+            className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
+            style={selectedVehicle === v.id ? {backgroundColor: '#3b5bdb', color: 'white'} : {backgroundColor: '#1e293b', color: '#94a3b8'}}
+          >
+            {v.photo_url && (
+              <img src={v.photo_url} className="w-5 h-5 rounded object-cover" />
+            )}
+            {v.brand} {v.model} · {v.plate}
+          </button>
+        ))}
+      </div>
+
+      {/* Lista */}
       <div className="grid gap-4">
-        {records.map(m => (
+        {filteredRecords.map(m => (
           <div
             key={m.id}
             className="card flex items-center justify-between gap-4 overflow-hidden"
@@ -85,7 +138,7 @@ export default function MaintenancePage() {
               <div className="min-w-0">
                 <p className="font-medium text-white truncate">{m.vehicles?.brand} {m.vehicles?.model} <span className="text-slate-500 text-sm">· {m.vehicles?.plate}</span></p>
                 <p className="text-slate-400 text-sm mt-0.5 truncate">
-                  {m.type} · Realizado: {new Date(m.date).toLocaleDateString('es-ES')}
+                  {m.type} · {new Date(m.date).toLocaleDateString('es-ES')}
                   {m.next_date && <> · Próximo: <span style={isUrgent(m.next_date) ? {color: '#f59e0b'} : {}}>{new Date(m.next_date).toLocaleDateString('es-ES')}</span></>}
                 </p>
                 {m.cost > 0 && <p className="text-slate-500 text-xs mt-1">{m.cost.toLocaleString()}€</p>}
@@ -104,7 +157,7 @@ export default function MaintenancePage() {
             </div>
           </div>
         ))}
-        {records.length === 0 && (
+        {filteredRecords.length === 0 && (
           <div className="card text-center py-12">
             <p className="text-slate-500">No hay registros de mantenimiento.</p>
           </div>
@@ -147,8 +200,4 @@ export default function MaintenancePage() {
               </div>
             </form>
           </div>
-        </div>
-      )}
-    </div>
-  )
-}
+        </
