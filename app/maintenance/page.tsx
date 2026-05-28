@@ -27,6 +27,7 @@ export default function MaintenancePage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [role, setRole] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [editing, setEditing] = useState<Maintenance | null>(null)
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null)
   const [form, setForm] = useState({ vehicle_id: '', type: '', date: '', next_date: '', cost: '', notes: '' })
 
@@ -46,6 +47,25 @@ export default function MaintenancePage() {
     getUserRole().then(setRole)
   }, [])
 
+  function openNew() {
+    setEditing(null)
+    setForm({ vehicle_id: '', type: '', date: '', next_date: '', cost: '', notes: '' })
+    setShowForm(true)
+  }
+
+  function openEdit(m: Maintenance) {
+    setEditing(m)
+    setForm({
+      vehicle_id: m.vehicle_id,
+      type: m.type,
+      date: m.date,
+      next_date: m.next_date || '',
+      cost: String(m.cost || ''),
+      notes: m.notes || ''
+    })
+    setShowForm(true)
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const payload: any = {
@@ -57,9 +77,15 @@ export default function MaintenancePage() {
     }
     if (form.next_date) payload.next_date = form.next_date
 
-    const { error } = await supabase.from('maintenance').insert(payload)
-    if (error) { alert('Error: ' + error.message); return }
+    if (editing) {
+      const { error } = await supabase.from('maintenance').update(payload).eq('id', editing.id)
+      if (error) { alert('Error al guardar: ' + error.message); return }
+    } else {
+      const { error } = await supabase.from('maintenance').insert(payload)
+      if (error) { alert('Error al añadir: ' + error.message); return }
+    }
     setShowForm(false)
+    setEditing(null)
     setForm({ vehicle_id: '', type: '', date: '', next_date: '', cost: '', notes: '' })
     load()
   }
@@ -92,7 +118,7 @@ export default function MaintenancePage() {
           </p>
         </div>
         {isAdmin && (
-          <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2">
+          <button onClick={openNew} className="btn-primary flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             Registrar
           </button>
@@ -115,9 +141,7 @@ export default function MaintenancePage() {
             className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
             style={selectedVehicle === v.id ? {backgroundColor: '#3b5bdb', color: 'white'} : {backgroundColor: '#1e293b', color: '#94a3b8'}}
           >
-            {v.photo_url && (
-              <img src={v.photo_url} className="w-5 h-5 rounded object-cover" />
-            )}
+            {v.photo_url && <img src={v.photo_url} className="w-5 h-5 rounded object-cover" />}
             {v.brand} {v.model} · {v.plate}
           </button>
         ))}
@@ -150,9 +174,14 @@ export default function MaintenancePage() {
                 <span className="badge-maintenance">Urgente</span>
               )}
               {isAdmin && (
-                <button onClick={() => handleDelete(m.id)} className="text-slate-400 hover:text-red-400 transition-colors p-2">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                </button>
+                <>
+                  <button onClick={() => openEdit(m)} className="text-slate-400 hover:text-white transition-colors p-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                  </button>
+                  <button onClick={() => handleDelete(m.id)} className="text-slate-400 hover:text-red-400 transition-colors p-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -167,7 +196,7 @@ export default function MaintenancePage() {
       {showForm && isAdmin && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div style={{backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '1rem', padding: '1.5rem'}} className="w-full max-w-md">
-            <h2 className="font-display text-xl font-semibold text-white mb-6">Registrar mantenimiento</h2>
+            <h2 className="font-display text-xl font-semibold text-white mb-6">{editing ? 'Editar mantenimiento' : 'Registrar mantenimiento'}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="label">Vehículo</label>
@@ -195,8 +224,8 @@ export default function MaintenancePage() {
                 <textarea className="input resize-none" rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} />
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1">Cancelar</button>
-                <button type="submit" className="btn-primary flex-1">Guardar</button>
+                <button type="button" onClick={() => { setShowForm(false); setEditing(null) }} className="btn-secondary flex-1">Cancelar</button>
+                <button type="submit" className="btn-primary flex-1">{editing ? 'Guardar cambios' : 'Registrar'}</button>
               </div>
             </form>
           </div>
