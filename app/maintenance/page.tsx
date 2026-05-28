@@ -200,4 +200,8 @@ export default function MaintenancePage() {
               </div>
             </form>
           </div>
-        </
+        </div>
+      )}
+    </div>
+  )
+}
