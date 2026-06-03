@@ -7,7 +7,7 @@ type Vehicle = {
   brand: string
   model: string
   plate: string
-  year: number
+  manufacture_date: string
   status: 'available' | 'reserved' | 'maintenance'
   chassis_number: string
   insurance_company: string
@@ -44,7 +44,7 @@ export default function VehiclesPage() {
   const [editing, setEditing] = useState<Vehicle | null>(null)
   const [uploading, setUploading] = useState(false)
   const [form, setForm] = useState({
-    brand: '', model: '', plate: '', year: '', status: 'available',
+    brand: '', model: '', plate: '', manufacture_date: '', status: 'available',
     chassis_number: '', insurance_company: '', insurance_policy: '',
     itv_date: '', photo_url: '', ownership: '',
     roof_rack_height: '', cargo_width: '', cargo_length: '',
@@ -83,7 +83,7 @@ export default function VehiclesPage() {
   function openNew() {
     setEditing(null)
     setForm({
-      brand: '', model: '', plate: '', year: '', status: 'available',
+      brand: '', model: '', plate: '', manufacture_date: '', status: 'available',
       chassis_number: '', insurance_company: '', insurance_policy: '',
       itv_date: '', photo_url: '', ownership: '',
       roof_rack_height: '', cargo_width: '', cargo_length: '',
@@ -95,7 +95,7 @@ export default function VehiclesPage() {
   function openEdit(v: Vehicle) {
     setEditing(v)
     setForm({
-      brand: v.brand, model: v.model, plate: v.plate, year: String(v.year), status: v.status,
+      brand: v.brand, model: v.model, plate: v.plate, manufacture_date: v.manufacture_date || '', status: v.status,
       chassis_number: v.chassis_number || '', insurance_company: v.insurance_company || '',
       insurance_policy: v.insurance_policy || '', itv_date: v.itv_date || '',
       photo_url: v.photo_url || '', ownership: v.ownership || '',
@@ -113,7 +113,7 @@ export default function VehiclesPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const payload = { ...form, year: Number(form.year) }
+    const payload = { ...form }
     if (editing) {
       const { error } = await supabase.from('vehicles').update(payload).eq('id', editing.id)
       if (error) { alert('Error al guardar: ' + error.message); return }
@@ -172,7 +172,7 @@ export default function VehiclesPage() {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="font-medium text-white truncate">{v.brand} {v.model} <span className="text-slate-500 font-normal">({v.year})</span></p>
+                  <p className="font-medium text-white truncate">{v.brand} {v.model} <span className="text-slate-500 font-normal">{v.manufacture_date && `(${v.manufacture_date})`}</span></p>
                   <p className="text-slate-400 text-sm mt-0.5 truncate">{v.plate}{v.itv_date && <> · ITV: <span style={itvUrgent(v.itv_date) ? {color: '#f59e0b'} : {}}>{new Date(v.itv_date).toLocaleDateString('es-ES')}</span></>}</p>
                 </div>
               </div>
@@ -211,7 +211,7 @@ export default function VehiclesPage() {
               <div className="flex items-start justify-between">
                 <div>
                   <h2 className="font-display text-2xl font-bold text-white">{selected.brand} {selected.model}</h2>
-                  <p className="text-slate-400 mt-1">{selected.plate} · {selected.year}</p>
+                  <p className="text-slate-400 mt-1">{selected.plate}{selected.manufacture_date && ` · ${selected.manufacture_date}`}</p>
                 </div>
                 <span className={selected.status === 'available' ? 'badge-available' : selected.status === 'reserved' ? 'badge-reserved' : 'badge-maintenance'}>
                   {statusLabel[selected.status]}
@@ -336,7 +336,7 @@ export default function VehiclesPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div><label className="label">Matrícula</label><input className="input" value={form.plate} onChange={e => setForm({...form, plate: e.target.value})} required /></div>
-                <div><label className="label">Año</label><input className="input" type="number" value={form.year} onChange={e => setForm({...form, year: e.target.value})} required /></div>
+                <div><label className="label">Fecha fabricación</label><input className="input" type="date" value={form.manufacture_date} onChange={e => setForm({...form, manufacture_date: e.target.value})} /></div>
               </div>
               <div><label className="label">Nº Bastidor</label><input className="input" value={form.chassis_number} onChange={e => setForm({...form, chassis_number: e.target.value})} /></div>
               <div className="grid grid-cols-2 gap-4">
