@@ -16,6 +16,7 @@ type Vehicle = {
   photo_url: string
   ownership: string
   roof_rack_height: string
+  vehicle_width: string
   cargo_width: string
   cargo_length: string
   cargo_diagonal: string
@@ -47,7 +48,8 @@ export default function VehiclesPage() {
     brand: '', model: '', plate: '', manufacture_date: '', status: 'available',
     chassis_number: '', insurance_company: '', insurance_policy: '',
     itv_date: '', photo_url: '', ownership: '',
-    roof_rack_height: '', cargo_width: '', cargo_length: '',
+    roof_rack_height: '', vehicle_width: '',
+    cargo_width: '', cargo_length: '',
     cargo_diagonal: '', cargo_entry_height: '', cargo_center_height: ''
   })
 
@@ -86,7 +88,8 @@ export default function VehiclesPage() {
       brand: '', model: '', plate: '', manufacture_date: '', status: 'available',
       chassis_number: '', insurance_company: '', insurance_policy: '',
       itv_date: '', photo_url: '', ownership: '',
-      roof_rack_height: '', cargo_width: '', cargo_length: '',
+      roof_rack_height: '', vehicle_width: '',
+      cargo_width: '', cargo_length: '',
       cargo_diagonal: '', cargo_entry_height: '', cargo_center_height: ''
     })
     setShowForm(true)
@@ -99,9 +102,10 @@ export default function VehiclesPage() {
       chassis_number: v.chassis_number || '', insurance_company: v.insurance_company || '',
       insurance_policy: v.insurance_policy || '', itv_date: v.itv_date || '',
       photo_url: v.photo_url || '', ownership: v.ownership || '',
-      roof_rack_height: v.roof_rack_height || '', cargo_width: v.cargo_width || '',
-      cargo_length: v.cargo_length || '', cargo_diagonal: v.cargo_diagonal || '',
-      cargo_entry_height: v.cargo_entry_height || '', cargo_center_height: v.cargo_center_height || ''
+      roof_rack_height: v.roof_rack_height || '', vehicle_width: v.vehicle_width || '',
+      cargo_width: v.cargo_width || '', cargo_length: v.cargo_length || '',
+      cargo_diagonal: v.cargo_diagonal || '', cargo_entry_height: v.cargo_entry_height || '',
+      cargo_center_height: v.cargo_center_height || ''
     })
     setShowForm(true)
   }
@@ -139,6 +143,7 @@ export default function VehiclesPage() {
     return diff < 30 * 24 * 60 * 60 * 1000
   }
 
+  const hasVehicleDimensions = (v: Vehicle) => v.roof_rack_height || v.vehicle_width
   const hasCargoDimensions = (v: Vehicle) =>
     v.cargo_width || v.cargo_length || v.cargo_diagonal || v.cargo_entry_height || v.cargo_center_height
 
@@ -247,13 +252,27 @@ export default function VehiclesPage() {
                     </p>
                   </div>
                 )}
-                {selected.roof_rack_height && (
-                  <div style={{backgroundColor: '#1e293b', borderRadius: '0.75rem', padding: '1rem'}}>
-                    <p className="text-slate-500 text-xs mb-1">Altura baca</p>
-                    <p className="text-white text-sm font-medium">{selected.roof_rack_height}</p>
-                  </div>
-                )}
               </div>
+
+              {hasVehicleDimensions(selected) && (
+                <div style={{backgroundColor: '#1e293b', borderRadius: '0.75rem', padding: '1rem'}}>
+                  <p className="text-slate-500 text-xs mb-3">Dimensiones vehículo</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {selected.roof_rack_height && (
+                      <div>
+                        <p className="text-slate-500 text-xs">Altura baca</p>
+                        <p className="text-white text-sm font-medium">{selected.roof_rack_height}</p>
+                      </div>
+                    )}
+                    {selected.vehicle_width && (
+                      <div>
+                        <p className="text-slate-500 text-xs">Anchura vehículo</p>
+                        <p className="text-white text-sm font-medium">{selected.vehicle_width}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {hasCargoDimensions(selected) && (
                 <div style={{backgroundColor: '#1e293b', borderRadius: '0.75rem', padding: '1rem'}}>
@@ -345,7 +364,13 @@ export default function VehiclesPage() {
               </div>
               <div><label className="label">Fecha ITV</label><input className="input" type="date" value={form.itv_date} onChange={e => setForm({...form, itv_date: e.target.value})} /></div>
               <div><label className="label">Propiedad</label><input className="input" placeholder="Ej: Propio, Renting (Alphabet)..." value={form.ownership} onChange={e => setForm({...form, ownership: e.target.value})} /></div>
-              <div><label className="label">Altura baca</label><input className="input" placeholder="Ej: 2.10m" value={form.roof_rack_height} onChange={e => setForm({...form, roof_rack_height: e.target.value})} /></div>
+              <div>
+                <label className="label">Dimensiones vehículo</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div><input className="input" placeholder="Altura baca" value={form.roof_rack_height} onChange={e => setForm({...form, roof_rack_height: e.target.value})} /></div>
+                  <div><input className="input" placeholder="Anchura vehículo" value={form.vehicle_width} onChange={e => setForm({...form, vehicle_width: e.target.value})} /></div>
+                </div>
+              </div>
               <div>
                 <label className="label">Dimensiones cajón</label>
                 <div className="grid grid-cols-2 gap-3">
